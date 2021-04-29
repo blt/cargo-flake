@@ -1,0 +1,21 @@
+[package]
+name = "cargo-flake"
+description = "a tool to detect flakey tests"
+version = "0.0.1"
+authors = ["Brian L. Troutwine <brian@troutwine.us>"]
+edition = "2018"
+license = "MIT"
+repository = "https://github.com/blt/cargo-flake"
+keywords = ["cargo", "flakey", "testing"]
+categories = ["command-line-utilities", "development-tools::testing", "development-tools::cargo-plugins"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+argh = "0.1"
+lazy_static = "1.4"
+regex = "1.4"
+rayon = "1.5"
+num_cpus = "1.13"
+indicatif = { version = "0.15", features = ["rayon", "improved_unicode"] }
+tabular = "0.1"
