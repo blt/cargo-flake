@@ -83,9 +83,4 @@ mod test {
         assert_eq!("a_test", &names[2]);
         assert_eq!("tls::settings::test::from_config_not_enabled", &names[3]);
     }
-
-    #[test]
-    fn born_to_fail() {
-        assert_eq!(3, 2 + 2);
-    }
 }
