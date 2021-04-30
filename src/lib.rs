@@ -9,7 +9,7 @@ use regex::Regex;
 use std::str;
 
 #[derive(FromArgs, Debug)]
-/// `flaker` -- a flakey test seeker
+/// `cargo-flake` -- a tool to detect flakey tests
 pub struct Config {
     /// total global thread count
     #[argh(option)]
@@ -18,6 +18,10 @@ pub struct Config {
     /// comma separated feature list
     #[argh(option)]
     pub features: Option<String>,
+
+    /// only run tests with this prefix
+    #[argh(option)]
+    pub prefix: Option<String>,
 
     /// how many times to run individual tests
     #[argh(option)]
@@ -30,7 +34,7 @@ pub struct Config {
 
 lazy_static! {
     static ref TEST_NAME_RE: Regex =
-        Regex::new("((?:[a-zA-Z0-9_]+[:]{2})*(?:[a-zA-Z0-9_]+)?): test").unwrap();
+        Regex::new("((?:[a-zA-Z0-9_]+[:]{2})*[a-zA-Z0-9_]+): test").unwrap();
 }
 
 #[must_use]
@@ -75,12 +79,32 @@ mod test {
 
     #[test]
     fn test_name_match() {
-        let text = "tests::a_test: test\n\nA_test: test\nnonsense text\na_test: test\ntls::settings::test::from_config_not_enabled: test";
+        let text = "tests::a_test: test\n\nA_test: test\nnonsense text\na_test: test\ntls::settings::test::from_config_not_enabled: test\n: test";
         let names = parse_test_names(text);
 
         assert_eq!("tests::a_test", &names[0]);
         assert_eq!("A_test", &names[1]);
         assert_eq!("a_test", &names[2]);
         assert_eq!("tls::settings::test::from_config_not_enabled", &names[3]);
+        assert_eq!(4, names.len());
+    }
+
+    #[test]
+    fn test_long() {
+        let mut sum: u128 = 1;
+        for _ in 0..1_000_000_000 {
+            sum = sum.saturating_add(sum);
+            assert!(true)
+        }
+        assert!(sum > 2);
+    }
+
+    #[ignore]
+    #[test]
+    fn born_to_fail() {
+        for _ in 0..1_000_000 {
+            assert!(true)
+        }
+        assert!(false)
     }
 }

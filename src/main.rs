@@ -6,47 +6,35 @@ use std::str;
 use tabular::{Row, Table};
 
 pub fn get_test_names(config: &Config) -> Result<Vec<String>, std::io::Error> {
-    let list_cmd = if let Some(ref features) = config.features {
-        format!("cargo test --features \"{}\" -- --list", features)
-    } else {
-        "cargo test -- --list".into()
+    let mut cargo_cmd: String = "cargo test".into();
+    if let Some(ref features) = config.features {
+        cargo_cmd.push_str(" --features ");
+        cargo_cmd.push_str(features);
     };
+    cargo_cmd.push_str(" -- --list");
 
-    let output = Command::new("sh").arg("-c").arg(list_cmd).output()?;
+    let output = Command::new("sh").arg("-c").arg(cargo_cmd).output()?;
     let stdout = str::from_utf8(&output.stdout).expect("stdout not utf8");
     Ok(parse_test_names(stdout))
 }
 
 pub fn run_single_test(setup: TestSetup) -> Result<TestResult, std::io::Error> {
-    let range = 0..(setup.iterations as usize);
-
-    let result = range
-        .into_par_iter()
-        .fold_with(TestResult::new(setup.name.clone()), |mut result, _| {
-            let status = Command::new("sh")
-                .arg("-c")
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .arg(&setup.command)
-                .status()
-                .unwrap();
-            result.iterations += 1;
-            if status.success() {
-                result.successes += 1;
-            } else {
-                result.failures += 1;
-            }
-            result
-        })
-        .reduce(
-            || TestResult::new(setup.name.clone()),
-            |mut l: TestResult, r: TestResult| {
-                l.iterations += r.iterations;
-                l.successes += r.successes;
-                l.failures += r.failures;
-                l
-            },
-        );
+    let mut result = TestResult::new(setup.name);
+    for _ in 0..(setup.iterations as usize) {
+        let status = Command::new("sh")
+            .arg("-c")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .arg(&setup.command)
+            .status()
+            .unwrap();
+        result.iterations += 1;
+        if status.success() {
+            result.successes += 1;
+        } else {
+            result.failures += 1;
+        }
+    }
 
     Ok(result)
 }
@@ -72,17 +60,26 @@ fn main() -> Result<(), std::io::Error> {
     let results: Vec<TestResult> = names
         .into_par_iter()
         .progress_with(bar)
-        .map(|name| {
-            let cargo_cmd = if let Some(ref features) = config.features {
-                format!("cargo test --features {} {}", features, name)
+        .filter(|name| {
+            if let Some(ref prefix) = config.prefix {
+                name.starts_with(prefix)
             } else {
-                format!("cargo test {}", name)
+                true
+            }
+        })
+        .map(|name| {
+            let mut cargo_cmd: String = "cargo test".into();
+            if let Some(ref features) = config.features {
+                cargo_cmd.push_str(" --features ");
+                cargo_cmd.push_str(features);
             };
+            cargo_cmd.push_str(" ");
+            cargo_cmd.push_str(&name);
 
             let setup = TestSetup {
                 name,
                 command: cargo_cmd,
-                iterations: config.iterations.unwrap_or(1_000),
+                iterations: config.iterations.unwrap_or(100),
             };
 
             run_single_test(setup).unwrap()
