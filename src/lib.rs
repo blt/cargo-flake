@@ -15,7 +15,7 @@ pub struct Config {
     #[argh(option)]
     pub threads: Option<usize>,
 
-    /// comma separated feature list
+    /// space separated feature list
     #[argh(option)]
     pub features: Option<String>,
 

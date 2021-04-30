@@ -8,8 +8,9 @@ use tabular::{Row, Table};
 pub fn get_test_names(config: &Config) -> Result<Vec<String>, std::io::Error> {
     let mut cargo_cmd: String = "cargo test".into();
     if let Some(ref features) = config.features {
-        cargo_cmd.push_str(" --features ");
+        cargo_cmd.push_str(" --features \"");
         cargo_cmd.push_str(features);
+        cargo_cmd.push_str("\"");
     };
     cargo_cmd.push_str(" -- --list");
 
@@ -70,8 +71,9 @@ fn main() -> Result<(), std::io::Error> {
         .map(|name| {
             let mut cargo_cmd: String = "cargo test".into();
             if let Some(ref features) = config.features {
-                cargo_cmd.push_str(" --features ");
+                cargo_cmd.push_str(" --features \"");
                 cargo_cmd.push_str(features);
+                cargo_cmd.push_str("\"");
             };
             cargo_cmd.push_str(" ");
             cargo_cmd.push_str(&name);
