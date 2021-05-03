@@ -16,6 +16,7 @@ pub struct Config {
 }
 
 impl Config {
+    #[must_use]
     pub fn flake_config(&self) -> Option<&FlakeConfig> {
         match self.nested {
             SubCommand::Flake(ref fc) => Some(fc),

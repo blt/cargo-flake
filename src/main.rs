@@ -10,7 +10,7 @@ pub fn get_test_names(config: &FlakeConfig) -> Result<Vec<String>, std::io::Erro
     if let Some(ref features) = config.features {
         cargo_cmd.push_str(" --features \"");
         cargo_cmd.push_str(features);
-        cargo_cmd.push_str("\"");
+        cargo_cmd.push('\"');
     };
     cargo_cmd.push_str(" -- --list");
 
@@ -75,9 +75,9 @@ fn main() -> Result<(), std::io::Error> {
             if let Some(ref features) = config.features {
                 cargo_cmd.push_str(" --features \"");
                 cargo_cmd.push_str(features);
-                cargo_cmd.push_str("\"");
+                cargo_cmd.push('\"');
             };
-            cargo_cmd.push_str(" ");
+            cargo_cmd.push(' ');
             cargo_cmd.push_str(&name);
 
             let setup = TestSetup {
