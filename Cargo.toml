@@ -17,5 +17,5 @@ lazy_static = "1.4"
 regex = "1.5"
 rayon = "1.5"
 num_cpus = "1.13"
-indicatif = { version = "0.15", features = ["rayon", "improved_unicode"] }
+indicatif = { version = "0.16", features = ["rayon", "improved_unicode"] }
 tabular = "0.1"
