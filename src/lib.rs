@@ -9,8 +9,30 @@ use regex::Regex;
 use std::str;
 
 #[derive(FromArgs, Debug)]
-/// `cargo-flake` -- a tool to detect flakey tests
+/// see `flake` subcommand
 pub struct Config {
+    #[argh(subcommand)]
+    nested: SubCommand,
+}
+
+impl Config {
+    pub fn flake_config(&self) -> Option<&FlakeConfig> {
+        match self.nested {
+            SubCommand::Flake(ref fc) => Some(fc),
+        }
+    }
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand)]
+enum SubCommand {
+    Flake(FlakeConfig),
+}
+
+#[derive(FromArgs, Debug)]
+#[argh(subcommand, name = "flake")]
+/// `cargo flake` -- a tool to detect flakey tests
+pub struct FlakeConfig {
     /// total global thread count
     #[argh(option)]
     pub threads: Option<usize>,

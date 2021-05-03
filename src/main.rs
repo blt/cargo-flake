@@ -1,11 +1,11 @@
-use cargo_flake::{parse_test_names, Config, TestResult, TestSetup};
+use cargo_flake::{parse_test_names, Config, FlakeConfig, TestResult, TestSetup};
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::process::{Command, Stdio};
 use std::str;
 use tabular::{Row, Table};
 
-pub fn get_test_names(config: &Config) -> Result<Vec<String>, std::io::Error> {
+pub fn get_test_names(config: &FlakeConfig) -> Result<Vec<String>, std::io::Error> {
     let mut cargo_cmd: String = "cargo test".into();
     if let Some(ref features) = config.features {
         cargo_cmd.push_str(" --features \"");
@@ -42,7 +42,9 @@ pub fn run_single_test(setup: TestSetup) -> Result<TestResult, std::io::Error> {
 
 fn main() -> Result<(), std::io::Error> {
     let cpus = num_cpus::get();
-    let config: Config = argh::from_env();
+    let top_config: Config = argh::from_env();
+    let config: &FlakeConfig = top_config.flake_config().unwrap();
+
     let tolerable_failures = config.tolerable_failures.unwrap_or(0);
 
     rayon::ThreadPoolBuilder::new()
