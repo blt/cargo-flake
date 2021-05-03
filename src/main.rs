@@ -83,7 +83,7 @@ fn main() -> Result<(), std::io::Error> {
             let setup = TestSetup {
                 name,
                 command: cargo_cmd,
-                iterations: config.iterations.unwrap_or(100),
+                iterations: config.iterations.unwrap_or(10),
             };
 
             run_single_test(setup).unwrap()
@@ -108,6 +108,7 @@ fn main() -> Result<(), std::io::Error> {
             );
         }
         println!("{}", table);
+        ::std::process::exit(1);
     } else {
         println!("no flakey tests detected")
     }
