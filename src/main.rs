@@ -1,7 +1,7 @@
 use cargo_flake::{parse_test_names, Config, FlakeConfig, TestResult, TestSetup};
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use rayon::prelude::*;
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::str;
 use tabular::{Row, Table};
 
@@ -22,17 +22,18 @@ pub fn get_test_names(config: &FlakeConfig) -> Result<Vec<String>, std::io::Erro
 pub fn run_single_test(setup: TestSetup) -> Result<TestResult, std::io::Error> {
     let mut result = TestResult::new(setup.name);
     for _ in 0..(setup.iterations as usize) {
-        let status = Command::new("sh")
+        let output = Command::new("sh")
             .arg("-c")
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
             .arg(&setup.command)
-            .status()
+            .output()
             .unwrap();
         result.iterations += 1;
-        if status.success() {
+        if output.status.success() {
             result.successes += 1;
         } else {
+            result
+                .failure_output
+                .push(String::from_utf8(output.stdout).unwrap());
             result.failures += 1;
         }
     }
@@ -99,15 +100,20 @@ fn main() -> Result<(), std::io::Error> {
                 .with_cell("SUCCESSES")
                 .with_cell("TEST"),
         );
-        for result in results {
+        for result in &results {
             table.add_row(
                 Row::new()
                     .with_cell(result.failures)
                     .with_cell(result.successes)
-                    .with_cell(result.name),
+                    .with_cell(&result.name),
             );
         }
         println!("{}", table);
+        for result in results {
+            for item in result.failure_output {
+                println!("{}", item);
+            }
+        }
         ::std::process::exit(1);
     } else {
         println!("no flakey tests detected")

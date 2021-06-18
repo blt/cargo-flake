@@ -82,6 +82,7 @@ pub struct TestResult {
     pub iterations: u16,
     pub successes: u16,
     pub failures: u16,
+    pub failure_output: Vec<String>
 }
 
 impl TestResult {
@@ -92,6 +93,7 @@ impl TestResult {
             iterations: 0,
             successes: 0,
             failures: 0,
+            failure_output: Vec::new()
         }
     }
 }
