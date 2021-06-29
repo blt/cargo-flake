@@ -22,7 +22,7 @@ pub fn get_test_names(config: &FlakeConfig) -> Result<Vec<String>, std::io::Erro
 pub fn run_single_test(setup: TestSetup) -> Result<TestResult, std::io::Error> {
     let mut result = TestResult::new(setup.name);
     for _ in 0..(setup.iterations as usize) {
-        let output = Command::new("sh")
+        let mut output = Command::new("sh")
             .arg("-c")
             .arg(&setup.command)
             .output()
@@ -31,9 +31,7 @@ pub fn run_single_test(setup: TestSetup) -> Result<TestResult, std::io::Error> {
         if output.status.success() {
             result.successes += 1;
         } else {
-            result
-                .failure_output
-                .push(String::from_utf8(output.stdout).unwrap());
+            result.failure_output.append(&mut output.stdout);
             result.failures += 1;
         }
     }

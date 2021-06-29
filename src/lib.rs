@@ -82,7 +82,7 @@ pub struct TestResult {
     pub iterations: u16,
     pub successes: u16,
     pub failures: u16,
-    pub failure_output: Vec<String>
+    pub failure_output: Vec<u8>
 }
 
 impl TestResult {
