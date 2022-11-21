@@ -15,7 +15,7 @@ categories = ["command-line-utilities", "development-tools::testing", "developme
 argh = "0.1"
 lazy_static = "1.4"
 regex = "1.5"
-rayon = "1.5"
+rayon = "1.6"
 num_cpus = "1.13"
 indicatif = { version = "0.16", features = ["rayon", "improved_unicode"] }
 tabular = "0.1"
